@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>App</title>
+    <script src="https://unpkg.com/vue@next"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+    <style>
+      .demo{
+        font-family: sans-serif;
+        border: 1px solid #eee;
+        border-radius: 2px;
+        padding: 20px 30px;
+        margin-top: 1em;
+        margin-bottom: 40px;
+        user-select: none;
+        overflow-x: auto;
+      }
+
+      .tab-button{
+        padding: 6px 10px;
+        border-top-left-radius: 3px;
+        border-top-right-radius: 3px;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        background: #f0f0f0;
+        margin-bottom: -1px;
+        margin-right: -1px;
+      }
+
+      .tab-button:hover{
+        background: #e0e0e0;
+      }
+
+      .tab-button.active{
+        background: #e0e0e0;
+      }
+
+      .demo-tab{
+        border: 1px solid #ccc;
+        padding: 10px;
+      }
+
+      #demo2-button{
+        background: #d93419;
+        border-radius: 4px;
+        display: inline-block;
+        border: none;
+        padding: 0.75rem 1rem;
+        margin: 20px 10px 0 0;
+        text-decoration: none;
+        color: #ffffff;
+        font-family: sans-serif;
+        font-size: 1rem;
+        cursor: pointer;
+        text-align: center;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+      }
+
+      #demo2-button:focus {
+        outline: 1px dashed #fff;
+        outline-offset: -3px;
+      }
+
+      .shake {
+        animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+        transform: translate3d(0,0,0);
+        backface-visibility: hidden;
+        perspective: 1000px;
+      }
+
+      @keyframes shake{
+        10%, 90%{
+          transform: translate3d(-1px,0,0);
+        }
+        20%, 80%{
+          transform: translate3d(2px,0,0);
+        }
+        30%, 50%, 70%{
+          transform: translate3d(-4px,0,0);
+        }
+        40%, 60%{
+          transform: translate3d(4px,0,0);
+        }
+      }
+
+      .button {
+        background: #1b8f5a;
+        transition: background 0.25s ease-in;
+        border-radius: 4px;
+        display: inline-block;
+        border: none;
+        padding: 0.75rem 1rem;
+        margin: 0;
+        text-decoration: none;
+        color: #ffffff;
+        font-family: sans-serif;
+        font-size: 1rem;
+        cursor: pointer;
+        text-align: center;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+      }
+
+      #demo3-button:hover, #demo3-button:focus{
+        transition: background 0.3s ease-out;
+        background: #3eaf7c;
+      }
+
+      #demo3-button:focus{
+        outline: 1px solid #fff;
+        outline-offset: -4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="event-handling">
+      <p>{{ message }}</p>
+      <button v-on:click="reverseMessage">
+        Reverse Message
+      </button>
+    </div>
+
+    <div id="two-way-binding">
+      <p>{{ message }}</p>
+      <input v-model="message" />
+    </div>
+
+    <div id="list-rendering">
+      <ol>
+        <li v-for="todo in todos">
+          {{ todo.text }}
+        </li>
+      </ol>
+    </div>
+
+    <div id="todo-list-app">
+      <ol>
+        <todo-item
+          v-for="item in groceryList"
+          v-bind:todo="item"
+          v-bind:key="item.id"
+          ></todo-item>
+      </ol>
+    </div>
+
+    <div id="watch-example">
+      <p>
+        Ask a yes/no question:
+        <input v-model="question" />
+      </p>
+      <p>{{ answer }}</p>
+    </div>
+
+    <div id="demo">{{ fullName }}</div>
+
+    <ul id="array-rendering">
+      <li v-for="item in items">
+        {{ item.message }}
+      </li>
+    </ul>
+
+    <ul id="array-with-index">
+      <li v-for="(item, index) in items">
+        {{ parentMessage }} - {{ index }} - {{ item.message }}
+      </li>
+    </ul>
+
+    <ul id="v-for-object">
+      <li v-for="value in myObject">
+        {{ value }}
+      </li>
+    </ul>
+
+    <ul id="v-for-object2">
+      <li v-for="(value, name) in myObject2">
+        {{ name }}: {{ value }}
+      </li>
+    </ul>
+
+    <ul id="v-for-object3">
+      <li v-for="(value, name, index) in myObject3">
+        {{ index }}. {{ name }}: {{ value }}
+      </li>
+    </ul>
+
+    <ul id="array-filter">
+      <li v-for="n in evenNumbers">
+        {{ n }}
+      </li>
+    </ul>
+
+    <div id="nested-for">
+      <ul v-for="numbers in sets">
+        <li v-for="n in even(numbers)">{{ n }}</li>
+      </ul>
+    </div>
+
+    <div id="range">
+      <span v-for="n in 10">{{ n }}</span>
+    </div>
+
+    <div id="basic-event">
+      <button @click="counter += 1">Add 1</button>
+      <p>The button above has been clicked {{ counter }} times</p>
+    </div>
+
+    <div id="event-with-method">
+      <button @click="greet">Greet</button>
+    </div>
+
+    <div id="inline-handler">
+      <button @click="say('hi')">Say hi</button>
+      <button @click="say('what')">Say what</button>
+    </div>
+
+    <div id="warn-event">
+      <button @click="warn('Form cannot be submitted yet',$event)">
+        Submit
+      </button>
+    </div>
+
+    <div id="v-model-basic">
+      <input v-model="message" placeholder="edit me" />
+      <p>Message is: {{ message }}</p>
+    </div>
+
+    <div id="v-model-textarea">
+      <span>Multiline message is:</span>
+      <p>{{ message }}</p>
+      <br />
+      <textarea v-model="message" placeholder="add multiple lines"></textarea>
+    </div>
+
+    <div id="v-model-checkbox">
+      <input type="checkbox" id="checkbox" v-model="checked" />
+      <label for="checkbox">{{ checked }}</label>
+    </div>
+
+    <div id="v-model-multiple-checkboxes">
+      <input type="checkbox" id="jack" value="Jack" v-model="checkedNames" />
+      <label for="jack">Jack</label>
+      <input type="checkbox" id="john" value="John" v-model="checkedNames" />
+      <label for="john">John</label>
+      <input type="checkbox" id="mike" value="Mike" v-model="checkedNames" />
+      <label for="mike">Mike</label>
+      <br />
+      <span>Checked names: {{ checkedNames }}</span>
+    </div>
+
+    <div id="v-model-radiobutton">
+      <input type="radio" id="one" value="One" v-model="picked" />
+      <label for="one">One</label>
+      <br />
+      <input type="radio" id="two" value="Two" v-model="picked" />
+      <label for="two">Two</label>
+      <br />
+      <span>Picked: {{ picked }}</span>
+    </div>
+
+    <div id="v-model-select">
+      <select v-model="selected">
+        <option disabled value="">Please select one</option>
+        <option>A</option>
+        <option>B</option>
+        <option>C</option>
+      </select>
+      <span>Selected: {{ selected }}</span>
+    </div>
+
+    <div id="v-model-select2">
+      <select v-model="selected" multiple>
+        <option>A</option>
+        <option>B</option>
+        <option>C</option>
+      </select>
+      <br />
+      <span>Selected: {{ selected }}</span>
+    </div>
+
+    <div id="v-model-select-dynamic">
+      <select v-model="selected">
+        <option v-for="option in options" :value="option.value">
+          {{ option.text }}
+        </option>
+      </select>
+      <span>Selected: {{ selected }}</span>
+    </div>
+
+    <div id="components-demo">
+      <button-counter></button-counter>
+    </div>
+
+    <div id="components-demo2">
+      <button-counter></button-counter>
+      <button-counter></button-counter>
+      <button-counter></button-counter>
+    </div>
+
+    <div id="blog-post-demo">
+      <blog-post title="My journey with Vue"></blog-post>
+      <blog-post title="Blogging with Vue"></blog-post>
+      <blog-post title="Why Vue is fun"></blog-post>
+    </div>
+
+    <div id="blog-post-demo2">
+      <blog-post
+        v-for="post in posts"
+        :key="post.id"
+        :title="post.title"
+      ></blog-post>
+    </div>
+
+    <div id="blog-post-events">
+      <div :style="{ fontSize: postFontSize + 'em' }">
+        <blog-post
+          v-for="post in posts"
+          :key="post.id"
+          :title="post.title"
+          @enlarge-text="postFontSize += 0.1">
+        </blog-post>
+      </div>
+    </div>
+
+    <div id="slots-demo">
+      <alert-box>
+        Something bad happened
+      </alert-box>
+    </div>
+
+    <div id="dynamic-component-demo" class="demo">
+      <button
+        v-for="tab in tabs"
+        v-bind:key="tab"
+        v-bind:class="['tab-button', {
+        active: currentTab === tab }]"
+        v-on:click="currentTab = tab">
+        {{ tab }}
+      </button>
+      <component
+        v-bind:is="currentTabComponent" class="tab">
+      </component>
+    </div>
+
+    <div id="v-model-example">
+      <p>First name: {{ firstName }}</p>
+      <p>Last name: {{ lastName }}</p>
+      <user-name
+        v-model:first-name="firstName"
+        v-moodel:last-name="lastName"
+      ></user-name>
+    </div>
+
+    <div id="demo2">
+      Push this button to do something you shouldn't be doing:<br>
+      <div :class="{ shake: noActivated }">
+        <button id="demo2-button" @click="noActivated = true">
+          Click me
+        </button>
+        <span v-if="noActivated">Oh no!</span>
+      </div>
+    </div>
+
+    <div id="demo3">
+      <button class="button" id="demo3-button">
+        {{ message }}
+      </button>
+    </div>
+    
+    <script>
+      const EventHandling = {
+        data() {
+          return {
+            message: 'Hello Vue.js!'
+          }
+        },
+        methods: {
+          reverseMessage() {
+            this.message = this.message
+              .split('')
+              .reverse()
+              .join('')
+          }
+        }
+      }
+
+      Vue.createApp(EventHandling).mount("#event-handling");
+
+      const TwoWayBinding = {
+        data() {
+          return {
+            message : 'Hello Vue!'
+          }
+        }
+      }
+
+      Vue.createApp(TwoWayBinding).mount("#two-way-binding");
+
+      const ListRendering = {
+        data() {
+          return {
+            todos: [
+              { text: 'Learn JS' },
+              { text: 'Learn Vue' },
+              { text: 'Do something cool'}
+            ]
+          }
+        }
+      }
+
+      Vue.createApp(ListRendering).mount("#list-rendering");
+
+      const TodoList = {
+        data() {
+          return {
+            groceryList: [
+              { id: 0, text: 'Vegetable' },
+              { id: 1, text: 'Cheese' },
+              { id: 2, text: 'Something else'}
+            ]
+          }
+        }
+      }
+
+      const app = Vue.createApp(TodoList);
+
+      app.component('todo-item', {
+        props: ['todo'],
+        template: `<li>{{ todo.text }}</li>`
+      })
+
+      app.mount('#todo-list-app');
+
+      const watchExampleVM = Vue.createApp({
+        data() {
+          return {
+            question: '',
+            answer: 'Questions usually contain a question mark'
+          }
+        },
+        watch: {
+          question(newQuestion, oldQuestion) {
+            if(newQuestion.indexOf('?') > -1) {
+              this.getAnswer()
+            }
+          }
+        },
+        methods: {
+          getAnswer() {
+            this.answer = 'Thinking...'
+            axios
+              .get('https://yesno.wtf/api')
+              .then(response => {
+                this.answer = response.data.answer
+              })
+              .catch(error => {
+                this.answer = 'Error! ' + error
+              })
+          }
+        }
+      }).mount('#watch-example')
+
+      const vm = Vue.createApp({
+        data() {
+          return {
+            firstName: 'Foo',
+            lastName: 'Bar'
+          }
+        },
+        computed: {
+          fullName() {
+            return this.firstName + ' ' + this.lastName
+          }
+        }
+      }).mount('#demo')
+
+      Vue.createApp({
+        data() {
+          return {
+            items: [{ message: 'Goo' }, { message: 'Far' }]
+          }
+        }
+      }).mount('#array-rendering')
+
+      Vue.createApp({
+        data() {
+          return {
+            parentMessage: 'Parent',
+            items: [{ message: 'Loo' }, { message: 'Gar' }]
+          }
+        }
+      }).mount('#array-with-index')
+
+      Vue.createApp({
+        data() {
+          return {
+            myObject: {
+              title: 'How to list in Vue',
+              author: 'Jane Doe',
+              publishedAt: '2016-04-10'
+            }
+          }
+        }
+      }).mount('#v-for-object')
+
+      Vue.createApp({
+        data() {
+          return {
+            myObject2: {
+              title: 'How to gist in Vue',
+              author: 'Lane Goe',
+              publishedAt: '2018-04-10'
+            }
+          }
+        }
+      }).mount('#v-for-object2')
+
+      Vue.createApp({
+        data() {
+          return {
+            myObject3: {
+              title: 'How to mist in Vue',
+              author: 'Gane Loe',
+              publishedAt: '2020-04-10'
+            }
+          }
+        }
+      }).mount('#v-for-object3')
+
+      Vue.createApp({
+        data() {
+          return {
+            numbers: [1,2,3,4,5]
+          }
+        },
+        computed: {
+          evenNumbers() {
+            return this.numbers.filter(number => number % 2 ===0)
+          }
+        }
+      }).mount('#array-filter')
+
+      Vue.createApp({
+        data() {
+          return {
+            sets: [[1,2,3,4,5], [6,7,8,9,10]]
+          }
+        },
+        methods: {
+          even(numbers) {
+            return numbers.filter(number => number % 2 === 0)
+          }
+        }
+      }).mount('#nested-for')
+
+      Vue.createApp({}).mount('#range')
+
+      Vue.createApp({
+        data() {
+          return {
+            counter: 1
+          }
+        }
+      }).mount('#basic-event')
+
+      Vue.createApp({
+        data() {
+          return {
+            name: 'Vue.js'
+          }
+        },
+        methods: {
+          greet(event) {
+            alert('Hello ' + this.name + '!')
+            if(event) {
+              alert(event.target.tagName)
+            }
+          }
+        }
+      }).mount('#event-with-method')
+
+      Vue.createApp({
+        methods: {
+          say(message) {
+            alert(message)
+          }
+        }
+      }).mount('#inline-handler')
+
+      Vue.createApp({
+        methods: {
+          warn(message,event) {
+            if(event) {
+              event.preventDefault()
+            }
+            alert(message)
+          }
+        }
+      }).mount('#warn-event')
+
+      Vue.createApp({
+        data() {
+          return {
+            message: ''
+          }
+        }
+      }).mount('#v-model-basic')
+
+      Vue.createApp({
+        data() {
+          return {
+            message: ''
+          }
+        }
+      }).mount('#v-model-textarea')
+
+      Vue.createApp({
+        data() {
+          return {
+            checked: false
+          }
+        }
+      }).mount('#v-model-checkbox')
+
+      Vue.createApp({
+        data() {
+          return {
+            checkedNames: []
+          }
+        }
+      }).mount('#v-model-multiple-checkboxes')
+
+      Vue.createApp({
+        data() {
+          return {
+            picked: ''
+          }
+        }
+      }).mount('#v-model-radiobutton')
+
+      Vue.createApp({
+        data() {
+          return {
+            selected: ''
+          }
+        }
+      }).mount('#v-model-select')
+
+      Vue.createApp({
+        data() {
+          return {
+            selected: ''
+          }
+        }
+      }).mount('#v-model-select2')
+
+      Vue.createApp({
+        data() {
+          return {
+            selected: 'A',
+            options: [
+              { text: 'One', value: 'A' },
+              { text: 'Two', value: 'B' },
+              { text: 'Three', value: 'C'}
+            ]
+          }
+        }
+      }).mount('#v-model-select-dynamic')
+
+      const compdem = Vue.createApp({})
+
+      compdem.component('button-counter', {
+        data() {
+          return {
+            count: 0
+          }
+        }, 
+        template: `
+          <button @click="count++">
+            You clicked me {{ count }} times
+          </button>`
+      })
+
+      compdem.mount('#components-demo')
+
+      const compdem2 = Vue.createApp({})
+
+      compdem2.component('button-counter', {
+        data() {
+          return {
+            count: 0
+          }
+        }, 
+        template: `
+          <button @click="count++">
+            You clicked me {{ count }} times
+          </button>`
+      })
+
+      compdem2.mount('#components-demo2')
+
+      const blogdemo = Vue.createApp({})
+
+      blogdemo.component('blog-post', {
+        props: ['title'],
+        template: `<h4>{{ title }}</h4>`
+      })
+
+      blogdemo.mount('#blog-post-demo')
+
+      const blogdemo2 = {
+        data() {
+          return {
+            posts: [
+              { id: 1, title: 'Vue journey' },
+              { id: 2, title: 'Vue blogs' },
+              { id: 3, title: 'Fun Vue' }
+            ]
+          }
+        }
+      }
+
+      const blogpost = Vue.createApp(blogdemo2)
+
+      blogpost.component('blog-post', {
+        props: ['title'],
+        template: `<h4>{{ title }}</h4>`
+      })
+
+      blogpost.mount('#blog-post-demo2')
+
+      const blogEvents = Vue.createApp({
+        data() {
+          return {
+            posts: [
+              { id: 1, title: 'Journey Vue'},
+              { id: 2, title: 'Blog Vue'},
+              { id: 3, title: 'Vue Fun'}
+            ],
+            postFontSize: 1
+          }
+        }
+      })
+
+      blogEvents.component('blog-post', {
+        props: ['title'],
+        template: `
+          <div class="blog-post">
+            <h4>{{ title }}</h4>
+            <button @click="$emit('enlarge-text')">
+              Enlarge Text
+            </button>
+          </div>`
+      })
+
+      blogEvents.mount('#blog-post-events')
+
+      const slotDemo = Vue.createApp({})
+
+      slotDemo.component('alert-box', {
+        template: `
+          <div>
+            <strong>Error!</strong>
+            <slot></slot>
+          </div>
+        `
+      })
+
+      slotDemo.mount('#slots-demo')
+
+      const dynamicDemo = Vue.createApp({
+        data() {
+          return {
+            currentTab: 'Home',
+            tabs: ['Home', 'Posts', 'Archive']
+          }
+        },
+        computed: {
+          currentTabComponent() {
+            return 'tab-' + this.currentTab.toLowerCase()
+          }
+        }
+      })
+
+      dynamicDemo.component('tab-home', {
+        template: `
+          <div class="demo-tab">
+            Home component
+          </div>`
+      })
+      dynamicDemo.component('tab-posts', {
+        template: `
+          <div class="demo-tab">
+            Posts component
+          </div>`
+      })
+      dynamicDemo.component('tab-archive', {
+        template: `
+          <div class="demo-tab">
+            Archive component
+          </div>`
+      })
+
+      dynamicDemo.mount('#dynamic-component-demo')
+
+      const UserName = {
+        props: {
+          firstName: String,
+          lastName: String
+        },
+       
+        template: `
+          <input
+            type="text"
+            :value="firstName"
+            @input="$emit('update:firstName',
+            $event.target.value)"
+          >
+          <input
+            type="text"
+            :value="lastName"
+            @input="$emit('update:lastName',
+            $event.target.value)"
+          >
+        `
+      };
+
+      const HelloVueApp = {
+        components: {
+          UserName,
+        },
+        data() {
+          return {
+            firstName: 'John',
+            lastName: 'Doe',
+          };
+        },
+      };
+
+      Vue.createApp(HelloVueApp).mount('#v-model-example')
+
+      const Demo2 = {
+        data() {
+          return {
+            noActivated: false
+          }
+        }
+      }
+
+      Vue.createApp(Demo2).mount('#demo2')
+
+      const Demo3 = {
+        data() {
+          return {
+            message: 'Hover Me!'
+          }
+        }
+      }
+
+      Vue.createApp(Demo3).mount('#demo3')
+    </script>
+    <!-- built files will be auto injected -->
+  </body>
+</html>
